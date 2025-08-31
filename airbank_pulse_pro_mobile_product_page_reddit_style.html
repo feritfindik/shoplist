@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Airbank Pulse Pro — Portable SUP Pump</title>
+  <style>
+    :root {
+      --reddit-orange: #FF4500;
+      --reddit-blue: #0079D3;
+      --bg: #ffffff;
+      --text: #1a1a1b;
+      --muted: #6b6f76;
+      --line: #EDEFF1;
+      --card: #ffffff;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --bar-height: 56px;          /* Tabs & Title share height */
+      --menu-height: 44px;         /* Menu bar height */
+      --content-max: 780px;        /* For larger devices */
+      --radius: 12px;
+    }
+    html, body { background: var(--bg); color: var(--text); padding: 0; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
+    a { color: var(--reddit-blue); text-decoration: none; }
+    a:active { opacity: 0.8; }
+
+    /* ===== Fixed Bars ===== */
+    .fixed { position: fixed; left: 0; right: 0; z-index: 1000; background: var(--bg); }
+
+    /* TABS */
+    .tabs {
+      top: 0; height: var(--bar-height); border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 4px 10px;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex: 0 0 auto; height: calc(var(--bar-height) - 8px); aspect-ratio: 1.9 / 1; /* wide-ish thumbs */
+      display: flex; align-items: center; justify-content: center; border-radius: 12px 12px 0 0;
+      border: 1px solid var(--line); border-bottom: 3px solid var(--line); background: #f7f8f9; padding: 0; box-shadow: none;
+      outline: none; cursor: pointer;
+    }
+    .tab img { height: 100%; width: 100%; object-fit: cover; border-radius: 10px 10px 0 0; }
+    .tab.active {
+      background: var(--bg);
+      border-color: var(--line);
+      border-bottom-color: var(--bg); /* visually connects to Title bar below */
+      box-shadow: 0 -1px 0 var(--bg) inset, 0 2px 0 var(--bg);
+    }
+
+    /* TITLE BAR */
+    .title-bar { top: var(--bar-height); height: var(--bar-height); border-bottom: 1px solid var(--line); display: flex; align-items: center; }
+    .title-inner { max-width: var(--content-max); margin: 0 auto; padding: 8px 14px; width: 100%; }
+    .product-name { font-size: 17px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+    .meta-line { font-size: 13px; color: var(--muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #fff5f2; border: 1px solid #ffd5c7; color: var(--reddit-orange); font-weight: 600; margin-right: 6px; }
+
+    /* MENU BAR */
+    .menu { top: calc(var(--bar-height) * 2); height: var(--menu-height); border-bottom: 1px solid var(--line); display: flex; align-items: center; }
+    .menu-inner { max-width: var(--content-max); margin: 0 auto; padding: 0 8px; width: 100%; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .menu::-webkit-scrollbar, .menu-inner::-webkit-scrollbar { display: none; }
+    .menu a { flex: 0 0 auto; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: #f8f9fa; color: #2f3136; }
+    .menu a.active { border-color: var(--reddit-orange); background: #fff6f2; color: var(--reddit-orange); }
+
+    /* CONTENT WRAPPER */
+    .content { max-width: var(--content-max); margin: 0 auto; padding: calc(var(--bar-height) * 2 + var(--menu-height) + 12px) 12px 48px 12px; }
+    .section { margin: 16px 0 20px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px; }
+    .kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; }
+    .h2 { font-size: 16px; font-weight: 800; margin: 0 0 10px; }
+    .subtle { color: var(--muted); }
+
+    /* SUMMARY */
+    .summary p { margin: 0 0 10px; font-size: 14px; line-height: 1.4; }
+    .summary h3 { font-size: 14px; font-weight: 800; margin: 12px 0 6px; }
+
+    /* INCLUDED (two columns on mobile) */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-2 h4 { font-size: 14px; margin: 4px 0 8px; }
+    .grid-2 ul { list-style: disc; padding-left: 16px; margin: 0; }
+    .grid-2 li { margin-bottom: 6px; font-size: 14px; }
+
+    /* REVIEWS */
+    .review { padding: 12px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); }
+    .review + .review { margin-top: 10px; }
+    .review h4 { margin: 0 0 6px; font-size: 15px; font-weight: 800; }
+    .review .summary { color: #2f3136; font-size: 14px; margin-bottom: 8px; }
+    .quote { background: #f9fafb; border: 1px solid var(--line); border-radius: 10px; padding: 10px; font-size: 14px; margin-top: 8px; }
+    .quote footer { margin-top: 6px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+
+    /* External link icon */
+    .ext { display: inline-flex; vertical-align: text-bottom; }
+    .ext svg { width: 12px; height: 12px; }
+
+    /* COMPARE AGAINST */
+    .compare-item { padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: var(--shadow); }
+    .compare-item + .compare-item { margin-top: 8px; }
+    .compare-item .title { font-weight: 800; font-size: 14px; margin-bottom: 6px; }
+    .compare-item p { margin: 0; font-size: 14px; }
+
+    /* LEARN MORE */
+    .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .spec { background: #f9fafb; border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+    .spec .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .spec .value { font-size: 14px; font-weight: 700; margin-top: 2px; }
+    .tips { margin-top: 12px; }
+    .tips li { margin-bottom: 8px; }
+
+    /* Helpers */
+    .divider { height: 8px; }
+    .dot { margin: 0 6px; color: #c2c5cc; }
+    .muted { color: var(--muted); }
+
+    /* Safe area for iOS */
+    .tabs, .title-bar, .menu { padding-left: max(10px, env(safe-area-inset-left)); padding-right: max(10px, env(safe-area-inset-right)); }
+    .content { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+  </style>
+</head>
+<body>
+  <!-- ===== TABS (image-only) ===== -->
+  <div class="tabs fixed" id="tabs">
+    <button class="tab active" aria-label="Amazon Listing 1"><img src="https://m.media-amazon.com/images/I/61cSi1xueCL._AC_SX679_.jpg" alt="Tab 1" /></button>
+    <button class="tab" aria-label="Amazon Listing 2"><img src="https://m.media-amazon.com/images/I/41j+rK23uYL._MCnd_AC_.jpg" alt="Tab 2" /></button>
+    <button class="tab" aria-label="Amazon Listing 3"><img src="https://m.media-amazon.com/images/I/61D5Had-TGL._AC_SL1500_.jpg" alt="Tab 3" /></button>
+    <button class="tab" aria-label="Amazon Listing 4"><img src="https://m.media-amazon.com/images/I/51HIhxkQY8L._AC_SL1398_.jpg" alt="Tab 4" /></button>
+    <button class="tab" aria-label="Amazon Listing 5"><img src="https://m.media-amazon.com/images/I/51iNc3rxwNL._AC_SL1500_.jpg" alt="Tab 5" /></button>
+  </div>
+
+  <!-- ===== TITLE BAR ===== -->
+  <div class="title-bar fixed" id="titlebar">
+    <div class="title-inner">
+      <div class="product-name">Airbank Pulse Pro</div>
+      <div class="meta-line">
+        <span class="badge">Amazon’s Choice</span>
+        <span>4.6 / 5 (106)</span>
+        <span class="dot">•</span>
+        <span>Amazon ($149.99)</span>
+        <span class="dot">•</span>
+        <span>Airbank ($149)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MENU BAR ===== -->
+  <nav class="menu fixed" id="menu">
+    <div class="menu-inner">
+      <a href="#summary" class="active">SUMMARY</a>
+      <a href="#included">INCLUDED</a>
+      <a href="#reviews">REVIEWS</a>
+      <a href="#compare">COMPARE</a>
+      <a href="#learn">LEARN</a>
+    </div>
+  </nav>
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+
+    <!-- SUMMARY (no section title; first sentence has no heading) -->
+    <section id="summary" class="section">
+      <div class="card summary">
+        <p>A palm-sized, cordless SUP pump with a brushless motor and dual-stage inflation up to 20 PSI, rechargeable via USB‑C.</p>
+        <h3>Why Buy</h3>
+        <p>Extremely portable and truly cordless — it fits in a small dry bag and recharges, letting you inflate/deflate SUPs, kayaks, tents and wings without access to mains or a car. The brushless motor and dual-stage design deliver fast initial volume then a high-pressure finish, saving time and effort compared with hand pumps and larger corded inflators.</p>
+        <h3>Why Not Buy</h3>
+        <p>Not ideal if you routinely inflate large high-pressure boards (12'6" or very frequent 20 PSI sessions) because the small unit runs hot in sustained high-pressure use and long-term durability under heavy high-PSI duty is a concern. Also it does not include a wall charger and can be quite loud in its high-pressure/second stage.</p>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- WHAT'S INCLUDED (no section title) -->
+    <section id="included" class="section">
+      <div class="grid-2">
+        <div class="card">
+          <h4>Included</h4>
+          <ul>
+            <li>PULSE Pro pump unit</li>
+            <li>Air hose</li>
+            <li>Multiple air nozzles/adapters (stackable/assorted)</li>
+            <li>Rubber gaskets/washers</li>
+            <li>USB‑C charging cable</li>
+            <li>Waterproof/dry storage bag</li>
+            <li>User manual</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Not Included</h4>
+          <ul>
+            <li>USB‑C wall charger (30W+ PD recommended)</li>
+            <li>12V car adapter / direct car power cable</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- REVIEWS -->
+    <section id="reviews" class="section">
+      <div class="kicker">Reviews</div>
+
+      <!-- Positive: Truly compact and portable -->
+      <article class="review">
+        <h4>Truly compact and portable</h4>
+        <div class="summary">Users consistently praise the Pulse Pro's tiny size (about 900 g, palm-sized) and waterproof carry bag, making it easy to carry to shore, pack in a SUP bungee or stow in a backpack. Many reviewers say it replaces larger, corded pumps for day trips and hikes.</div>
+        <div class="quote">
+          <div>“This incredibly compact battery powered unit filled my SUP from flat to full 12 PSI in 7 minutes ... The size is really good. It's very compact compared to my other SUP pumps.”</div>
+          <footer>— Kevin Photo <span class="ext"><a href="https://www.amazon.com/" target="_blank" rel="noopener">Amazon
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+        <div class="quote">
+          <div>“It's small and lightweight ... it's so easy to take right to the shore with you so you don't have to lug whatever you're inflating from the car to the shore.”</div>
+          <footer>— WTI Gina <span class="ext"><a href="https://www.youtube.com/" target="_blank" rel="noopener">YouTube
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+      </article>
+
+      <!-- Positive: Battery life -->
+      <article class="review">
+        <h4>Good battery life for multiple inflations</h4>
+        <div class="summary">The 4500 mAh battery regularly completed multiple inflations on one charge — reviewers and video tests report 2–4 typical inflations (e.g., three 10'6" boards to ~12–15 PSI) per charge depending on board size and target PSI.</div>
+        <div class="quote">
+          <div>“It charges fully in about 90 minutes, and provides 2 to 3 uses per charge.”</div>
+          <footer>— flyteach <span class="ext"><a href="https://www.amazon.com/" target="_blank" rel="noopener">Amazon
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+        <div class="quote">
+          <div>“Three boards at up to 15 PSI... that was three boards on one charge. The battery still got three bars left.”</div>
+          <footer>— Pulse Pro hands-on review <span class="ext"><a href="https://www.youtube.com/" target="_blank" rel="noopener">YouTube
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+      </article>
+
+      <!-- Positive: Fast & powerful -->
+      <article class="review">
+        <h4>Fast and powerful inflation</h4>
+        <div class="summary">The brushless motor and two-stage design let the pump inflate boards quickly (many users report 5–10 minutes to reach typical SUP pressures), making it faster and less effort than hand pumps and convenient compared with larger plug-in pumps for shorter trips.</div>
+        <div class="quote">
+          <div>“It takes about 5 minutes to inflate my paddleboard from zero to 13 PSI.”</div>
+          <footer>— Matthew <span class="ext"><a href="https://www.amazon.com/" target="_blank" rel="noopener">Amazon
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+        <div class="quote">
+          <div>“While we were pumping them up at the lake ... they were so impressed with how quick it was and how convenient it was to not have to plug into a car for power.”</div>
+          <footer>— WTI Gina <span class="ext"><a href="https://www.youtube.com/" target="_blank" rel="noopener">YouTube
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+      </article>
+
+      <!-- Negative: Loudness -->
+      <article class="review">
+        <h4>Loud in high-pressure (second) stage</h4>
+        <div class="summary">Many users report the pump becomes noticeably loud when it shifts into the high-pressure/compressor stage — this is an expected tradeoff in small high-pressure pumps but can be disruptive at lakes or busy launch spots.</div>
+        <div class="quote">
+          <div>“This worked very quickly and quietly until the SUP ... reached 1 psi. As soon as there was any back pressure the pump changed sounds and got very loud ... it also made the tube very hot!”</div>
+          <footer>— D'Anemone <span class="ext"><a href="https://www.amazon.com/" target="_blank" rel="noopener">Amazon
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+        <div class="quote">
+          <div>“It changes sound and goes into high pressure pumping mode.”</div>
+          <footer>— Pulse Pro hands-on review <span class="ext"><a href="https://www.youtube.com/" target="_blank" rel="noopener">YouTube
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+      </article>
+
+      <!-- Negative: Heat / High PSI strain -->
+      <article class="review">
+        <h4>Heat buildup and strain on heavy high-PSI jobs</h4>
+        <div class="summary">Small pumps like this generate heat under sustained high-pressure duty; reviewers and testers warn that repeated inflations at 20 PSI (large/long boards) can overheat connectors and shorten lifespan — one user reported the hose became too hot to touch and ~96 dB at 1 m during use.</div>
+        <div class="quote">
+          <div>“It pumped my 14' SUP in 10.3 minutes and produced 96 decibels at one meter. The hose got so hot I could no longer touch it.”</div>
+          <footer>— Amazon Kunde <span class="ext"><a href="https://www.amazon.com/" target="_blank" rel="noopener">Amazon
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+        <div class="quote">
+          <div>“Any of these small Q pumps we've tried ... they all seem to fall apart when you do a 12'6 board that inflates to 20 PSI. When you go to a big touring board that goes to high pressure, they can do it once, maybe twice, but that seems to be too much heat inside and that seems to kill them.”</div>
+          <footer>— Pulse Pro hands-on review <span class="ext"><a href="https://www.youtube.com/" target="_blank" rel="noopener">YouTube
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+      </article>
+
+      <!-- Negative: Reliability / No charger -->
+      <article class="review">
+        <h4>Some reliability / early-failure reports</h4>
+        <div class="summary">While many customers report good performance, isolated reports exist of units failing after a small number of uses (won't charge or turn on), and at least one customer cited poor seller response for warranty/help.</div>
+        <div class="quote">
+          <div>“This worked really well… twice! We only use it once in a while so it is outside the return date by a week. It won’t charge it won’t turn on. I tried contacting the seller with absolutely no response.”</div>
+          <footer>— Cindee <span class="ext"><a href="https://www.amazon.com/" target="_blank" rel="noopener">Amazon
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+      </article>
+
+      <article class="review">
+        <h4>No charger included / slow charging without PD adapter</h4>
+        <div class="summary">The pump includes a USB-C cable but not a USB-C power adapter; reviewers emphasize you should bring a 30W+ USB-C PD charger for reasonable recharge times or it will be very slow with low-power phone chargers.</div>
+        <div class="quote">
+          <div>“It doesn't come with a charger. ... You are really gonna want a 30W charger or you need to be 1000% certain that you aren't gonna need to use it more than once a day.”</div>
+          <footer>— Jon Allen <span class="ext"><a href="https://www.amazon.com/" target="_blank" rel="noopener">Amazon
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z" fill="currentColor"/></svg></a></span></footer>
+        </div>
+      </article>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- COMPARE AGAINST -->
+    <section id="compare" class="section">
+      <div class="kicker">Compare Against</div>
+      <div class="compare-item">
+        <div class="title">Outdoor Master Shark 2 / Shark 3</div>
+        <p>The Pulse Pro is far smaller and more portable than the Shark pumps; it inflates typical 10'–11' boards faster for single trips but the larger Shark units may dissipate heat better for repeated 20 PSI jobs.</p>
+      </div>
+      <div class="compare-item">
+        <div class="title">Cachalot 2</div>
+        <p>Pulse Pro is more compact and often quieter during stage 1 than older Cachalot models and delivers comparable or faster inflation for mid-size SUPs.</p>
+      </div>
+      <div class="compare-item">
+        <div class="title">Puffer Pro / other mini high-pressure pumps</div>
+        <p>Pulse Pro is reportedly smaller than many previous mini pumps but matches or exceeds inflation speed for 10'–11' boards; like other tiny high-pressure pumps, it shares limits on sustained 20 PSI use.</p>
+      </div>
+      <div class="compare-item">
+        <div class="title">Larger plug-in/12V SUP pumps</div>
+        <p>Compared with corded/12V pumps, Pulse Pro offers cordless convenience and portability but lacks the ability to run directly from a car socket and may not be as durable for repeated high-PSI jobs.</p>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- LEARN MORE -->
+    <section id="learn" class="section">
+      <div class="kicker">Learn More</div>
+      <div class="card">
+        <div class="h2">Specs that matter</div>
+        <div class="specs">
+          <div class="spec"><div class="label">Dimensions</div><div class="value">143 × 137 × 67.5 mm</div></div>
+          <div class="spec"><div class="label">Weight</div><div class="value">900 g (1.98 lbs)</div></div>
+          <div class="spec"><div class="label">Battery</div><div class="value">4500 mAh (14.8V / ~66 Wh)</div></div>
+          <div class="spec"><div class="label">Max Pressure</div><div class="value">20 PSI</div></div>
+          <div class="spec"><div class="label">Motor</div><div class="value">Brushless (advertised 80,000 rpm)</div></div>
+          <div class="spec"><div class="label">Speed</div><div class="value">450 L/min (stage 1), 70 L/min (stage 2)</div></div>
+          <div class="spec"><div class="label">Charging</div><div class="value">USB‑C (QC 3.1 / fast charge)</div></div>
+          <div class="spec"><div class="label">Auto‑off</div><div class="value">Inflate & Deflate</div></div>
+          <div class="spec"><div class="label">Compatibility</div><div class="value">H3, Boston & common valves</div></div>
+          <div class="spec"><div class="label">Operating Temp</div><div class="value">0–40°C (32–104°F)</div></div>
+        </div>
+        <div class="h2" style="margin-top:12px;">Usage tips</div>
+        <ul class="tips">
+          <li>Use the dual‑stage workflow: bulk fill first, then high‑pressure to finish; the pump auto‑stops at your set PSI.</li>
+          <li>Bring a 30W+ USB‑C PD charger for reasonable recharge times; low‑power phone chargers are very slow.</li>
+          <li>Let the pump cool between repeated high‑PSI inflations (e.g., large 12'6" boards at 20 PSI).</li>
+          <li>If a valve doesn’t seal, try different included gaskets or the gasket from your hand pump.</li>
+          <li>Use the dry bag for carry & splash protection; clip it to reduce perceived noise.</li>
+          <li>Consider a simple inlet filter for sandy beaches to reduce debris intake.</li>
+          <li>Fully tighten adapters before inflating to avoid slow leaks.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Smooth scroll with offset to account for fixed bars
+    const MENU_OFFSET = (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--bar-height')) * 2) + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--menu-height')) + 8;
+    document.querySelectorAll('.menu a').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const absoluteY = window.scrollY + rect.top - MENU_OFFSET;
+        window.scrollTo({ top: absoluteY, behavior: 'smooth' });
+      });
+    });
+
+    // Scroll spy to highlight active menu item
+    const sections = ['#summary','#included','#reviews','#compare','#learn'].map(s => document.querySelector(s));
+    const menuLinks = Array.from(document.querySelectorAll('.menu a'));
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = '#' + entry.target.id;
+          menuLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === id));
+        }
+      });
+    }, { rootMargin: `-${MENU_OFFSET + 10}px 0px -60% 0px`, threshold: 0.01 });
+    sections.forEach(s => s && observer.observe(s));
+
+    // Tabs: toggle active visual state
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    tabs.forEach(btn => btn.addEventListener('click', () => {
+      tabs.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }));
+  </script>
+</body>
+</html>
