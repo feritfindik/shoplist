@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Airbank Pulse Pro — Portable SUP Pump</title>
+  <style>
+    :root{
+      --bg: #0b0c0f; /* works in dark mode too via prefers-color-scheme */
+      --card: rgba(255,255,255,0.08);
+      --text: #f7f8fa;
+      --muted: #b7bbc7;
+      --tint: #0a84ff; /* iOS blue */
+      --accent: #34c759; /* iOS green */
+      --danger: #ff453a; /* iOS red */
+      --shadow: 0 10px 30px rgba(0,0,0,0.25);
+      --radius-xl: 20px;
+      --radius-lg: 14px;
+    }
+
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f5f7fb;
+        --card: rgba(255,255,255,0.9);
+        --text:#0b0c0f;
+        --muted:#5b6270;
+        --tint:#007aff;
+        --accent:#34c759;
+        --danger:#ff3b30;
+        --shadow: 0 10px 24px rgba(0,0,0,0.06);
+      }
+    }
+
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Segoe UI, Roboto, Helvetica, Arial, system-ui, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      scroll-behavior: smooth;
+    }
+
+    .safe{ padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+
+    /* Top Title Bar (NavigationBar) */
+    .titlebar{
+      position: fixed; inset:0 auto auto 0; right:0; height: 84px; z-index: 1000;
+      display:flex; flex-direction:column; justify-content:center;
+      padding: calc(10px + env(safe-area-inset-top)) 16px 10px 16px;
+      backdrop-filter: saturate(180%) blur(16px);
+      background: color-mix(in oklab, var(--bg) 60%, transparent);
+      border-bottom: 1px solid color-mix(in oklab, var(--text) 15%, transparent);
+    }
+    .product-name{ font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+    .subline{ font-size: 13px; color: var(--muted); margin-top: 3px; display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
+    .badge{ padding: 2px 8px; background: linear-gradient(180deg, #1f1f1f, #111); color:#ffcc00; border-radius: 999px; border:1px solid rgba(255,255,255,0.08); font-weight:600; font-size:12px; }
+    .rating{ display:inline-flex; align-items:center; gap:4px; }
+
+    /* Sticky Section Menu (Segmented control vibe) */
+    .menu{
+      position: sticky; top:84px; z-index: 999; background: color-mix(in oklab, var(--bg) 70%, transparent);
+      backdrop-filter: saturate(180%) blur(14px);
+      border-bottom: 1px solid color-mix(in oklab, var(--text) 15%, transparent);
+    }
+    .menu-inner{ display:flex; gap:8px; overflow:auto; -webkit-overflow-scrolling: touch; padding: 10px 12px; }
+    .pill{ flex:0 0 auto; border-radius: 999px; padding:10px 14px; background: var(--card); color: var(--text); border:1px solid rgba(255,255,255,0.08); font-weight:600; font-size:13px; letter-spacing: -0.01em; }
+    .pill.active{ outline: 2px solid color-mix(in oklab, var(--tint) 70%, transparent); background: color-mix(in oklab, var(--tint) 20%, var(--card)); }
+
+    main{ padding: 84px 0 40px; }
+    section{ padding: 18px 16px 8px; scroll-margin-top: 130px; }
+    h2{ font-size: 18px; margin: 0 0 12px 2px; letter-spacing: -0.01em; }
+
+    .card{
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-xl);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .grid{ display:grid; gap:12px; }
+    .grid.two{ grid-template-columns: 1fr 1fr; }
+    .grid.specs{ grid-template-columns: 1fr 1fr; }
+
+    .kv{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 12px; background: rgba(127,127,127,0.08); border-radius: var(--radius-lg); }
+    .kv .k{ color: var(--muted); font-size: 12px; }
+    .kv .v{ font-weight:600; font-size: 14px; text-align:right; }
+
+    .list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; }
+    .li{ display:flex; gap:10px; align-items:flex-start; }
+    .dot{ width:8px; height:8px; border-radius:50%; background: var(--tint); margin-top:7px; flex:0 0 auto; }
+
+    /* Carousel */
+    .carousel{ position:relative; overflow:hidden; border-radius: var(--radius-xl); }
+    .slides{ display:flex; transition: transform 320ms ease; touch-action: pan-y; }
+    .slide{ min-width: 100%; padding: 14px; }
+    .dots{ display:flex; gap:6px; justify-content:center; margin-top:10px; }
+    .dot-btn{ width:7px; height:7px; border-radius:50%; background: rgba(127,127,127,0.4); border:none; }
+    .dot-btn.active{ background: var(--tint); }
+
+    a{ color: var(--tint); text-decoration: none; }
+    .price{ font-weight:700; }
+    .retailer{ display:flex; justify-content:space-between; align-items:center; padding:12px; background: rgba(127,127,127,0.08); border-radius: var(--radius-lg); }
+
+    /* Footer spacing */
+    .bottom-space{ height: 80px; }
+  </style>
+</head>
+<body>
+  <!-- Title Bar -->
+  <header class="titlebar safe" id="top">
+    <div class="product-name">Airbank Pulse Pro</div>
+    <div class="subline">
+      <span class="badge">Amazon's Choice</span>
+      <span class="rating">★ 4.6 / 5 (106)</span>
+      <span>• Portable SUP Pump</span>
+    </div>
+  </header>
+
+  <!-- Sticky Menu -->
+  <nav class="menu" id="menu">
+    <div class="menu-inner" role="tablist">
+      <a class="pill active" href="#glance">Glance</a>
+      <a class="pill" href="#buy">Buy</a>
+      <a class="pill" href="#kit">Kit</a>
+      <a class="pill" href="#voices">Voices</a>
+      <a class="pill" href="#versus">Versus</a>
+      <a class="pill" href="#specs">Specs</a>
+      <a class="pill" href="#tips">Tips</a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- At a Glance -->
+    <section id="glance">
+      <h2>At a Glance</h2>
+      <div class="grid">
+        <div class="card">
+          <strong>What it is</strong>
+          <ul class="list" style="margin-top:8px;">
+            <li class="li"><span class="dot"></span><span>A compact, cordless rechargeable inflator with 4500 mAh (14.8V / ~66Wh) battery and brushless high‑speed motor (80,000 rpm), dual‑stage to 20 PSI.</span></li>
+            <li class="li"><span class="dot"></span><span>Weighs ~900 g, 143 × 137 × 67.5 mm; USB‑C fast charging; auto‑off at set PSI and auto‑off deflate.</span></li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong>Why buy</strong>
+          <ul class="list" style="margin-top:8px;">
+            <li class="li"><span class="dot"></span><span>Truly portable & cordless—great for SUPs, kayaks, wings, tents.</span></li>
+            <li class="li"><span class="dot"></span><span>Dual‑stage speed saves time; set PSI & let auto‑off finish.</span></li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong>Why not</strong>
+          <ul class="list" style="margin-top:8px;">
+            <li class="li"><span class="dot"></span><span>Not ideal for repeated 20 PSI on big boards (heat & strain).</span></li>
+            <li class="li"><span class="dot"></span><span>Loud in high‑pressure stage; wall charger not included.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Buy At -->
+    <section id="buy">
+      <h2>Buy</h2>
+      <div class="grid">
+        <div class="card retailer"><span>Amazon.com</span><span class="price">$149.99</span></div>
+        <div class="card retailer"><span>Airbank – Official</span><span class="price">$149.00</span></div>
+        <div class="card retailer"><span>KitePuertoRico (shop)</span><span class="price">$189.00</span></div>
+        <div class="card retailer"><span>AliExpress (AIRBANKEPUMP)</span><span class="price">~$95.00</span></div>
+      </div>
+      <p style="color:var(--muted); font-size:12px; margin-top:10px;">Prices are indicative; check retailer pages for current availability and shipping.</p>
+    </section>
+
+    <!-- What's Included (carousel with 2 slides: included / not included) -->
+    <section id="kit">
+      <h2>Kit</h2>
+      <div class="card carousel" data-carousel="kit">
+        <div class="slides">
+          <div class="slide">
+            <h3 style="margin:0 0 8px 0; font-size:16px;">What's included</h3>
+            <ul class="list">
+              <li class="li"><span class="dot"></span><span>PULSE Pro pump unit</span></li>
+              <li class="li"><span class="dot"></span><span>Air hose</span></li>
+              <li class="li"><span class="dot"></span><span>Multiple nozzles/adapters + gaskets</span></li>
+              <li class="li"><span class="dot"></span><span>USB‑C charging cable</span></li>
+              <li class="li"><span class="dot"></span><span>Waterproof/dry storage bag</span></li>
+              <li class="li"><span class="dot"></span><span>User manual</span></li>
+            </ul>
+          </div>
+          <div class="slide">
+            <h3 style="margin:0 0 8px 0; font-size:16px;">What's not included</h3>
+            <ul class="list">
+              <li class="li"><span class="dot" style="background:var(--danger);"></span><span>USB‑C wall charger (bring 30W+ PD for fast charging)</span></li>
+              <li class="li"><span class="dot" style="background:var(--danger);"></span><span>12V car adapter / direct car power cable</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="dots"></div>
+      </div>
+    </section>
+
+    <!-- What Customers Say (sentiments carousel) -->
+    <section id="voices">
+      <h2>Voices</h2>
+      <div class="card carousel" data-carousel="voices">
+        <div class="slides">
+          <div class="slide">
+            <strong>Truly compact & portable</strong>
+            <p style="margin:8px 0 0; color:var(--muted);">Tiny size (~900 g) with waterproof bag—easy to carry to shore; replaces larger corded pumps for day trips.</p>
+            <blockquote style="margin:10px 0 0; font-size:13px; opacity:0.9;">“Filled my SUP from flat to 12 PSI in ~7 min… very compact.”</blockquote>
+          </div>
+          <div class="slide">
+            <strong>Good battery life</strong>
+            <p style="margin:8px 0 0; color:var(--muted);">Often 2–4 inflations per charge depending on PSI and board size.</p>
+            <blockquote style="margin:10px 0 0; font-size:13px; opacity:0.9;">“Three boards up to 15 PSI on one charge.”</blockquote>
+          </div>
+          <div class="slide">
+            <strong>Fast & powerful</strong>
+            <p style="margin:8px 0 0; color:var(--muted);">Dual‑stage gets to typical SUP pressures in about 5–10 minutes.</p>
+            <blockquote style="margin:10px 0 0; font-size:13px; opacity:0.9;">“~5 minutes from zero to 13 PSI.”</blockquote>
+          </div>
+          <div class="slide">
+            <strong>Loud in high‑pressure stage</strong>
+            <p style="margin:8px 0 0; color:var(--muted);">Noticeably noisy when the compressor kicks in.</p>
+            <blockquote style="margin:10px 0 0; font-size:13px; opacity:0.9;">“Got very loud once back pressure started.”</blockquote>
+          </div>
+          <div class="slide">
+            <strong>Heat on heavy 20 PSI jobs</strong>
+            <p style="margin:8px 0 0; color:var(--muted);">Sustained high‑PSI runs can heat hoses/connectors—allow cooldowns.</p>
+            <blockquote style="margin:10px 0 0; font-size:13px; opacity:0.9;">“Hose got too hot to touch at 20 PSI.”</blockquote>
+          </div>
+          <div class="slide">
+            <strong>No charger / some failures</strong>
+            <p style="margin:8px 0 0; color:var(--muted);">Bring a 30W+ PD brick; a few reports of early failures.</p>
+            <blockquote style="margin:10px 0 0; font-size:13px; opacity:0.9;">“Worked great… twice. Then wouldn’t turn on.”</blockquote>
+          </div>
+        </div>
+        <div class="dots"></div>
+      </div>
+    </section>
+
+    <!-- Competition -->
+    <section id="versus">
+      <h2>Versus</h2>
+      <div class="grid">
+        <div class="card">
+          <strong>Outdoor Master Shark 2 / 3</strong>
+          <p style="margin:8px 0 0; color:var(--muted);">Pulse Pro is far smaller & more portable; faster for single 10'–11' boards. Shark units handle repeated 20 PSI better due to size/heat dissipation.</p>
+        </div>
+        <div class="card">
+          <strong>Cachalot 2</strong>
+          <p style="margin:8px 0 0; color:var(--muted);">Pulse Pro is smaller, often quieter in stage 1, with comparable or faster inflation for mid‑size SUPs.</p>
+        </div>
+        <div class="card">
+          <strong>Puffer Pro / mini pumps</strong>
+          <p style="margin:8px 0 0; color:var(--muted);">Similar footprint category, Pulse Pro matches/exceeds speed; like others, limited for sustained 20 PSI use.</p>
+        </div>
+        <div class="card">
+          <strong>12V plug‑in pumps</strong>
+          <p style="margin:8px 0 0; color:var(--muted);">Corded options are better for heavy, repeated jobs; Pulse Pro wins on cordless convenience.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Specs -->
+    <section id="specs">
+      <h2>Specs</h2>
+      <div class="card grid specs">
+        <div class="kv"><div class="k">Max Pressure</div><div class="v">20 PSI</div></div>
+        <div class="kv"><div class="k">Motor</div><div class="v">Brushless, 80,000 rpm</div></div>
+        <div class="kv"><div class="k">Battery</div><div class="v">4500 mAh (14.8V / ~66 Wh)</div></div>
+        <div class="kv"><div class="k">Charge</div><div class="v">USB‑C, QC 3.1 fast charge</div></div>
+        <div class="kv"><div class="k">Stages</div><div class="v">Dual: 450 L/min → 70 L/min</div></div>
+        <div class="kv"><div class="k">Auto‑Off</div><div class="v">Inflate & Deflate</div></div>
+        <div class="kv"><div class="k">Weight</div><div class="v">~900 g (1.98 lb)</div></div>
+        <div class="kv"><div class="k">Size</div><div class="v">143 × 137 × 67.5 mm</div></div>
+        <div class="kv"><div class="k">Operating Temp</div><div class="v">0–40°C (32–104°F)</div></div>
+        <div class="kv"><div class="k">Compatibility</div><div class="v">H3, Boston & common valves</div></div>
+      </div>
+    </section>
+
+    <!-- Tips -->
+    <section id="tips">
+      <h2>Tips</h2>
+      <div class="card">
+        <ul class="list">
+          <li class="li"><span class="dot"></span><span>Bulk fill on low stage, then high‑pressure to target PSI—let auto‑off finish.</span></li>
+          <li class="li"><span class="dot"></span><span>Use a 30W+ USB‑C PD charger; low‑power phone bricks are slow.</span></li>
+          <li class="li"><span class="dot"></span><span>Allow cooldown between repeated 20 PSI runs to reduce heat stress.</span></li>
+          <li class="li"><span class="dot"></span><span>If seal is tricky, swap gaskets or use your hand‑pump gasket.</span></li>
+          <li class="li"><span class="dot"></span><span>Run it from the included dry bag to keep sand out and reduce perceived noise.</span></li>
+          <li class="li"><span class="dot"></span><span>Add a simple inlet filter on sandy beaches to avoid debris intake.</span></li>
+          <li class="li"><span class="dot"></span><span>Tighten adapters fully to avoid leaks before inflating.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="bottom-space"></div>
+  </main>
+
+  <script>
+    // Active pill highlighting based on scroll
+    const sections = [...document.querySelectorAll('main section')];
+    const pills = [...document.querySelectorAll('.pill')];
+    const byId = id => pills.find(p => p.getAttribute('href') === `#${id}`);
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          pills.forEach(p => p.classList.remove('active'));
+          const tab = byId(entry.target.id);
+          tab && tab.classList.add('active');
+        }
+      });
+    }, { rootMargin: "-140px 0px -60% 0px", threshold: 0.01 });
+
+    sections.forEach(sec => observer.observe(sec));
+
+    // Simple touch carousel logic (reusable)
+    document.querySelectorAll('.carousel').forEach((el) => {
+      const slides = el.querySelector('.slides');
+      const slidesCount = slides.children.length;
+      let index = 0, startX = 0, currentX = 0, dragging = false;
+
+      const dotsWrap = el.querySelector('.dots');
+      const dots = [];
+      for(let i=0;i<slidesCount;i++){
+        const b = document.createElement('button');
+        b.className = 'dot-btn' + (i===0?' active':'');
+        b.setAttribute('aria-label', 'Go to slide ' + (i+1));
+        b.addEventListener('click', () => go(i));
+        dotsWrap.appendChild(b);
+        dots.push(b);
+      }
+
+      function go(i){
+        index = Math.max(0, Math.min(slidesCount-1, i));
+        slides.style.transform = `translateX(${-index*100}%)`;
+        dots.forEach((d,j)=>d.classList.toggle('active', j===index));
+      }
+
+      const onTouchStart = (e)=>{ dragging = true; startX = e.touches[0].clientX; };
+      const onTouchMove  = (e)=>{ if(!dragging) return; currentX = e.touches[0].clientX; const dx = currentX - startX; slides.style.transform = `translateX(${(-index*100) + (dx/window.innerWidth)*100}%)`; };
+      const onTouchEnd   = ()=>{ if(!dragging) return; dragging=false; const dx = currentX - startX; if(Math.abs(dx) > 40){ go(index + (dx<0?1:-1)); } else { go(index); } };
+
+      slides.addEventListener('touchstart', onTouchStart, {passive:true});
+      slides.addEventListener('touchmove', onTouchMove, {passive:true});
+      slides.addEventListener('touchend', onTouchEnd, {passive:true});
+
+      // Init
+      go(0);
+    });
+  </script>
+</body>
+</html>

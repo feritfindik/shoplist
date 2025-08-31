@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Airbank Pulse Pro — Sentiments</title>
+  <style>
+    /* --- Microsoft Metro (Modern UI) inspired styles --- */
+    :root{
+      --bg:#f2f2f2;
+      --card:#ffffff;
+      --text:#111111;
+      --muted:#6b6b6b;
+      --accent:#0078d7; /* Windows blue */
+      --accent-weak:#cfe8ff;
+      --shadow:0 6px 18px rgba(0,0,0,0.08);
+      --radius:18px;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    }
+
+    header{
+      padding:14px 16px 10px;
+      background:linear-gradient(180deg, var(--accent), #005ea6);
+      color:white;
+    }
+    header h1{
+      margin:0; font-size:20px; font-weight:600; letter-spacing:0.2px;
+    }
+    header .sub{opacity:0.9; font-size:12px; margin-top:2px;}
+
+    /* Carousel Shell */
+    .carousel{
+      position:relative; width:100%; overflow:hidden; margin:10px 0 24px;
+    }
+    .track{
+      display:flex; transition:transform 380ms cubic-bezier(.2,.8,.2,1);
+      will-change:transform;
+    }
+    .slide{
+      flex:0 0 100%; padding:18px 16px 22px; box-sizing:border-box;
+    }
+
+    /* Card */
+    .card{
+      background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:18px 16px; display:flex; flex-direction:column; gap:14px;
+    }
+
+    .badge{
+      align-self:flex-start; background:var(--accent-weak); color:var(--accent); font-weight:600;
+      padding:6px 10px; border-radius:999px; font-size:12px; letter-spacing:.2px;
+    }
+
+    .title{
+      font-size:18px; font-weight:700; line-height:1.25;
+    }
+    .summary{ font-size:14px; color:var(--muted); line-height:1.45; }
+
+    .quotes{ display:flex; flex-direction:column; gap:10px; }
+
+    .quote{
+      position:relative; padding:12px 12px 12px 14px; border:1px solid #e6e6e6; border-radius:12px; background:#fafafa;
+    }
+    .quote p{ margin:0 0 8px 0; font-size:14px; line-height:1.45; }
+
+    .cite-row{ display:flex; align-items:center; gap:8px; }
+    .cite{
+      font-size:12px; color:#444; font-weight:600;
+    }
+
+    /* Link indicator (visual cue as if it links to the original source) */
+    .source-link{
+      display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+      color:var(--accent); font-size:12px; font-weight:600; border:1px solid var(--accent);
+      border-radius:999px; padding:6px 10px; background:white;
+    }
+    .source-link:active{ transform:scale(0.98); }
+    .source-link svg{ width:14px; height:14px; }
+
+    /* Controls */
+    .controls{ display:flex; justify-content:space-between; align-items:center; padding:0 10px; margin-top:6px; }
+    .btn{
+      background:var(--card); border:none; border-radius:12px; box-shadow:var(--shadow);
+      padding:10px 12px; display:inline-flex; align-items:center; justify-content:center;
+    }
+    .btn svg{ width:20px; height:20px; }
+
+    .dots{ display:flex; gap:8px; }
+    .dot{
+      width:8px; height:8px; border-radius:50%; background:#c9c9c9; transition:all .2s ease;
+    }
+    .dot.active{ width:24px; border-radius:999px; background:var(--accent); }
+
+    /* Small helpers */
+    .sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+    /* Mobile-first; look crisp on small screens */
+    @media (min-width:480px){
+      .title{ font-size:20px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Airbank Pulse Pro — Sentiments</h1>
+    <div class="sub">Swipe or use arrows · Metro design · Mobile-friendly</div>
+  </header>
+
+  <div class="carousel" id="carousel">
+    <div class="track" id="track"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="prev" aria-label="Previous">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      <span class="sr">Previous</span>
+    </button>
+    <div class="dots" id="dots" aria-label="Slide indicators"></div>
+    <button class="btn" id="next" aria-label="Next">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      <span class="sr">Next</span>
+    </button>
+  </div>
+
+  <script>
+    // Data assembled from user-provided content
+    const sentiments = [
+      {
+        emotion: "positive",
+        title: "Truly compact and portable",
+        summary: "Users consistently praise the Pulse Pro's tiny size (about 900 g, palm-sized) and waterproof carry bag, making it easy to carry to shore, pack in a SUP bungee or stow in a backpack. Many reviewers say it replaces larger, corded pumps for day trips and hikes.",
+        quotes: [
+          { text: "This incredibly compact battery powered unit filled my SUP from flat to full 12 PSI in 7 minutes ... The size is really good. It's very compact compared to my other SUP pumps.", cite: "Kevin Photo (Amazon)" },
+          { text: "It's small and lightweight ... it's so easy to take right to the shore with you so you don't have to lug whatever you're inflating from the car to the shore.", cite: "WTI Gina pump review (YouTube)" }
+        ]
+      },
+      {
+        emotion: "positive",
+        title: "Good battery life for multiple inflations",
+        summary: "The 4500 mAh battery regularly completed multiple inflations on one charge — reviewers and video tests report 2–4 typical inflations (e.g., three 10'6\" boards to ~12–15 PSI) per charge depending on board size and target PSI.",
+        quotes: [
+          { text: "It charges fully in about 90 minutes, and provides 2 to 3 uses per charge.", cite: "flyteach (Amazon)" },
+          { text: "Three boards at up to 15 PSI... that was three boards on one charge. The battery still got three bars left.", cite: "Pulse Pro hands-on review (YouTube)" }
+        ]
+      },
+      {
+        emotion: "positive",
+        title: "Fast and powerful inflation",
+        summary: "The brushless motor and two-stage design let the pump inflate boards quickly (many users report 5–10 minutes to reach typical SUP pressures), making it faster and less effort than hand pumps and convenient compared with larger plug-in pumps for shorter trips.",
+        quotes: [
+          { text: "It takes about 5 minutes to inflate my paddleboard from zero to 13 PSI.", cite: "Matthew (Amazon)" },
+          { text: "While we were pumping them up at the lake ... they were so impressed with how quick it was and how convenient it was to not have to plug into a car for power.", cite: "WTI Gina pump review (YouTube)" }
+        ]
+      },
+      {
+        emotion: "positive",
+        title: "Auto-off and deflate features save effort",
+        summary: "Auto-stop at the set PSI and an auto-off deflation function make inflation and pack-up hands-free and quicker; reviewers appreciate that deflation stops automatically and that the pump handles both inflate and deflate tasks.",
+        quotes: [
+          { text: "The initial inflation goes pretty quickly... Deflating takes very little time, and the pump does a great job removing all air so you can store the board easily.", cite: "The Goode Life Outdoors (Amazon)" },
+          { text: "It has auto shut off once it reaches your set PSI ... once you have deflated your craft using it it will auto shut off so you don't have to do that manually.", cite: "WTI Gina pump review (YouTube)" }
+        ]
+      },
+      {
+        emotion: "negative",
+        title: "Loud in high-pressure (second) stage",
+        summary: "Many users report the pump becomes noticeably loud when it shifts into the high-pressure/compressor stage — this is an expected tradeoff in small high-pressure pumps but can be disruptive at lakes or busy launch spots.",
+        quotes: [
+          { text: "This worked very quickly and quietly until the SUP ... reached 1 psi. As soon as there was any back pressure the pump changed sounds and got very loud ... it also made the tube very hot!", cite: "D'Anemone (Amazon)" },
+          { text: "It changes sound and goes into high pressure pumping mode.", cite: "Pulse Pro hands-on review (YouTube)" }
+        ]
+      },
+      {
+        emotion: "negative",
+        title: "Heat buildup and strain on heavy high-PSI jobs",
+        summary: "Small pumps like this generate heat under sustained high-pressure duty; reviewers and testers warn that repeated inflations at 20 PSI (large/long boards) can overheat connectors and shorten lifespan — one user reported the hose became too hot to touch and ~96 dB at 1 m during use.",
+        quotes: [
+          { text: "It pumped my 14' SUP in 10.3 minutes and produced 96 decibels at one meter. The hose got so hot I could no longer touch it.", cite: "Amazon Kunde (Amazon)" },
+          { text: "Any of these small Q pumps we've tried ... they all seem to fall apart when you do a 12'6 board that inflates to 20 PSI. When you go to a big touring board that goes to high pressure, they can do it once, maybe twice, but that seems to be too much heat inside and that seems to kill them.", cite: "Pulse Pro hands-on review (YouTube)" }
+        ]
+      },
+      {
+        emotion: "negative",
+        title: "Some reliability / early-failure reports",
+        summary: "While many customers report good performance, isolated reports exist of units failing after a small number of uses (won't charge or turn on), and at least one customer cited poor seller response for warranty/help.",
+        quotes: [
+          { text: "This worked really well… twice! We only use it once in a while so it is outside the return date by a week. It won’t charge it won’t turn on. I tried contacting the seller with absolutely no response.", cite: "Cindee (Amazon)" }
+        ]
+      },
+      {
+        emotion: "negative",
+        title: "No charger included / slow charging without PD adapter",
+        summary: "The pump includes a USB-C cable but not a USB-C power adapter; reviewers emphasize you should bring a 30W+ USB-C PD charger for reasonable recharge times or it will be very slow with low-power phone chargers.",
+        quotes: [
+          { text: "It doesn't come with a charger. ... You are really gonna want a 30W charger or you need to be 1000% certain that you aren't gonna need to use it more than once a day.", cite: "Jon Allen (Amazon)" }
+        ]
+      },
+      {
+        emotion: "mixed",
+        title: "Adapters and sealing can require trial and error",
+        summary: "Most users find the supplied stackable nozzles and gaskets cover common valves, but some had to try different gaskets or use a hand-pump gasket to get a reliable seal; fitting certain kite/wing valves may require trial and careful tightening.",
+        quotes: [
+          { text: "I wasn't getting a good seal with the provided gaskets, and finally used the gasket from the hand pump that came with the board, and it sealed great.", cite: "The Goode Life Outdoors (Amazon)" },
+          { text: "I needed something that could inflate my tent ... this also comes with a variety of adapters which I found so awesome because I needed something that could inflate my tent ... I had to find the one that works.", cite: "wing inflation how-to (YouTube)" }
+        ]
+      }
+    ];
+
+    const track = document.getElementById('track');
+    const dotsWrap = document.getElementById('dots');
+
+    function linkIcon(){
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07 0l3.54-3.54a5 5 0 0 0-7.07-7.07L11 4"/><path d="M14 11a5 5 0 0 0-7.07 0L3.39 14.54a5 5 0 0 0 7.07 7.07L13 20"/></svg>`;
+    }
+
+    // Build slides
+    sentiments.forEach((s, idx)=>{
+      const slide = document.createElement('section');
+      slide.className = 'slide';
+      slide.setAttribute('role','group');
+      slide.setAttribute('aria-roledescription','slide');
+      slide.setAttribute('aria-label', `${idx+1} of ${sentiments.length}`);
+
+      slide.innerHTML = `
+        <article class="card">
+          <span class="badge">${s.emotion.toUpperCase()}</span>
+          <div class="title">${s.title}</div>
+          <div class="summary">${s.summary}</div>
+          <div class="quotes">
+            ${s.quotes.map(q => `
+              <div class="quote">
+                <p>“${q.text}”</p>
+                <div class="cite-row">
+                  <a class="source-link" href="#" title="Visual link indicator to original source (URL not provided)">
+                    ${linkIcon()} <span>Source</span>
+                  </a>
+                  <span class="cite">— ${q.cite}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </article>`;
+
+      track.appendChild(slide);
+
+      // dot
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (idx===0 ? ' active' : '');
+      dot.dataset.index = idx;
+      dotsWrap.appendChild(dot);
+    });
+
+    // Carousel logic
+    const state = { index: 0, total: sentiments.length, startX: 0, currentX: 0, isSwiping: false };
+
+    function update(){
+      const offset = -state.index * 100;
+      track.style.transform = `translateX(${offset}%)`;
+      [...dotsWrap.children].forEach((d,i)=> d.classList.toggle('active', i===state.index));
+    }
+
+    function next(){ state.index = (state.index + 1) % state.total; update(); }
+    function prev(){ state.index = (state.index - 1 + state.total) % state.total; update(); }
+
+    document.getElementById('next').addEventListener('click', next);
+    document.getElementById('prev').addEventListener('click', prev);
+
+    // Touch/Swipe support
+    const carousel = document.getElementById('carousel');
+    carousel.addEventListener('touchstart', (e)=>{
+      state.isSwiping = true; state.startX = e.touches[0].clientX; state.currentX = state.startX;
+    }, {passive:true});
+    carousel.addEventListener('touchmove', (e)=>{
+      if(!state.isSwiping) return; state.currentX = e.touches[0].clientX; const delta = state.currentX - state.startX; track.style.transform = `translateX(${(-state.index*100) + (delta / window.innerWidth)*100}%)`;
+    }, {passive:true});
+    carousel.addEventListener('touchend', ()=>{
+      const delta = state.currentX - state.startX; state.isSwiping = false;
+      if(Math.abs(delta) > 50){ delta < 0 ? next() : prev(); } else { update(); }
+    });
+
+    // Dot navigation
+    dotsWrap.addEventListener('click', (e)=>{
+      const d = e.target.closest('.dot'); if(!d) return; state.index = +d.dataset.index; update();
+    });
+
+    update();
+  </script>
+</body>
+</html>

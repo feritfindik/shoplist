@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Airbank Pulse Pro — Sentiments</title>
+  <style>
+    :root {
+      --reddit-orange: #ff4500;
+      --reddit-blue: #0079d3;
+      --bg: #f6f7f8; /* reddit light bg */
+      --card: #ffffff;
+      --text: #1a1a1b;
+      --muted: #7c7c7c;
+      --border: #e6e7e8;
+      --chip-bg: #f0f4ff;
+      --chip-border: #cfe0ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      position: sticky;
+      top: 0; z-index: 5;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px env(safe-area-inset-bottom);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--reddit-orange);
+      display: grid; place-items: center;
+      color: #fff; font-weight: 800;
+    }
+    .title {
+      font-size: 16px; font-weight: 800;
+    }
+
+    /* Carousel */
+    .carousel {
+      position: relative;
+      overflow: hidden;
+      width: 100vw;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .track {
+      display: flex;
+      transition: transform 0.35s ease;
+      will-change: transform;
+      touch-action: pan-y;
+    }
+    .slide {
+      min-width: 100%;
+      padding: 16px;
+    }
+
+    /* Card with Reddit look */
+    .card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 14px 4px 14px;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    }
+    .flair {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #ffece6; color: var(--reddit-orange);
+      border: 1px solid #ffd6c8; font-weight: 700;
+      padding: 2px 8px; border-radius: 999px; font-size: 12px;
+      margin-bottom: 8px;
+    }
+    .sentiment-title {
+      font-size: 18px; font-weight: 800; line-height: 1.2; margin: 6px 0 8px;
+    }
+    .summary {
+      font-size: 14px; color: var(--text); line-height: 1.4; margin: 0 0 10px;
+    }
+
+    .quotes {
+      display: grid; gap: 8px; margin: 12px 0 12px;
+    }
+    .quote {
+      position: relative;
+      border: 1px solid var(--chip-border);
+      background: var(--chip-bg);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .quote p {
+      margin: 0 0 8px 0; font-size: 14px;
+    }
+    .cite {
+      display: inline-flex; align-items: center; gap: 6px; 
+      font-size: 12px; color: var(--muted);
+    }
+    .cite a {
+      display: inline-flex; align-items: center; gap: 4px;
+      text-decoration: none; color: var(--reddit-blue);
+      border-bottom: 1px dashed var(--reddit-blue);
+    }
+    .ext { font-size: 12px; line-height: 1; }
+
+    /* Controls */
+    .controls {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 10px 16px 20px; max-width: 800px; margin: 0 auto;
+    }
+    .btn {
+      appearance: none; border: 1px solid var(--border); background: var(--card);
+      padding: 10px 14px; border-radius: 999px; font-weight: 700; font-size: 14px;
+      display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.04); color: var(--text);
+    }
+    .btn:active { transform: translateY(1px); }
+
+    .dots { display: flex; gap: 6px; align-items: center; justify-content: center; }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #d7dadc; border: 1px solid #c8cbcd;
+    }
+    .dot.active { background: var(--reddit-blue); border-color: var(--reddit-blue); }
+
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 12px 0 24px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">r</div>
+    <div>
+      <div class="title">Airbank Pulse Pro • Sentiments</div>
+      <div style="font-size:12px; color:var(--muted);">Swipe left/right • Reddit‑style UI • Tap the blue source chips ↗</div>
+    </div>
+  </header>
+
+  <main class="carousel" id="carousel" aria-roledescription="carousel" aria-label="Sentiment Carousel">
+    <div class="track" id="track">
+
+      <!-- Slides start -->
+      
+      <!-- 1 Positive: Truly compact and portable -->
+      <section class="slide" aria-roledescription="slide" aria-label="Truly compact and portable">
+        <article class="card">
+          <span class="flair">Positive</span>
+          <h2 class="sentiment-title">Truly compact and portable</h2>
+          <p class="summary">Users consistently praise the Pulse Pro's tiny size (about 900 g, palm-sized) and waterproof carry bag, making it easy to carry to shore, pack in a SUP bungee or stow in a backpack. Many reviewers say it replaces larger, corded pumps for day trips and hikes.</p>
+          <div class="quotes">
+            <div class="quote">
+              <p>"This incredibly compact battery powered unit filled my SUP from flat to full 12 PSI in 7 minutes ... The size is really good. It's very compact compared to my other SUP pumps."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">Kevin Photo (Amazon) <span class="ext">↗</span></a></div>
+            </div>
+            <div class="quote">
+              <p>"It's small and lightweight ... it's so easy to take right to the shore with you so you don't have to lug whatever you're inflating from the car to the shore."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">WTI Gina pump review (YouTube) <span class="ext">↗</span></a> <span class="muted" style="color:var(--muted)">00:23–00:45</span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- 2 Positive: Good battery life for multiple inflations -->
+      <section class="slide" aria-roledescription="slide" aria-label="Good battery life for multiple inflations">
+        <article class="card">
+          <span class="flair">Positive</span>
+          <h2 class="sentiment-title">Good battery life for multiple inflations</h2>
+          <p class="summary">The 4500 mAh battery regularly completed multiple inflations on one charge — reviewers and video tests report 2–4 typical inflations (e.g., three 10'6" boards to ~12–15 PSI) per charge depending on board size and target PSI.</p>
+          <div class="quotes">
+            <div class="quote">
+              <p>"It charges fully in about 90 minutes, and provides 2 to 3 uses per charge."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">flyteach (Amazon) <span class="ext">↗</span></a></div>
+            </div>
+            <div class="quote">
+              <p>"Three boards at up to 15 PSI... that was three boards on one charge. The battery still got three bars left."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">Pulse Pro hands-on review (YouTube) <span class="ext">↗</span></a> <span class="muted" style="color:var(--muted)">03:13–03:39</span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- 3 Positive: Fast and powerful inflation -->
+      <section class="slide" aria-roledescription="slide" aria-label="Fast and powerful inflation">
+        <article class="card">
+          <span class="flair">Positive</span>
+          <h2 class="sentiment-title">Fast and powerful inflation</h2>
+          <p class="summary">The brushless motor and two-stage design let the pump inflate boards quickly (many users report 5–10 minutes to reach typical SUP pressures), making it faster and less effort than hand pumps and convenient compared with larger plug-in pumps for shorter trips.</p>
+          <div class="quotes">
+            <div class="quote">
+              <p>"It takes about 5 minutes to inflate my paddleboard from zero to 13 PSI."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">Matthew (Amazon) <span class="ext">↗</span></a></div>
+            </div>
+            <div class="quote">
+              <p>"While we were pumping them up at the lake ... they were so impressed with how quick it was and how convenient it was to not have to plug into a car for power."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">WTI Gina pump review (YouTube) <span class="ext">↗</span></a> <span class="muted" style="color:var(--muted)">00:12–00:38</span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- 4 Positive: Auto-off and deflate features save effort -->
+      <section class="slide" aria-roledescription="slide" aria-label="Auto-off and deflate features save effort">
+        <article class="card">
+          <span class="flair">Positive</span>
+          <h2 class="sentiment-title">Auto-off and deflate features save effort</h2>
+          <p class="summary">Auto-stop at the set PSI and an auto-off deflation function make inflation and pack-up hands-free and quicker; reviewers appreciate that deflation stops automatically and that the pump handles both inflate and deflate tasks.</p>
+          <div class="quotes">
+            <div class="quote">
+              <p>"The initial inflation goes pretty quickly... Deflating takes very little time, and the pump does a great job removing all air so you can store the board easily."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">The Goode Life Outdoors (Amazon) <span class="ext">↗</span></a></div>
+            </div>
+            <div class="quote">
+              <p>"It has auto shut off once it reaches your set PSI ... once you have deflated your craft using it it will auto shut off so you don't have to do that manually."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">WTI Gina pump review (YouTube) <span class="ext">↗</span></a> <span class="muted" style="color:var(--muted)">01:15–01:27</span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- 5 Negative: Loud in high-pressure (second) stage -->
+      <section class="slide" aria-roledescription="slide" aria-label="Loud in high-pressure stage">
+        <article class="card">
+          <span class="flair" style="background:#ffeef0; color:#d93a3a; border-color:#ffdce0;">Negative</span>
+          <h2 class="sentiment-title">Loud in high‑pressure (second) stage</h2>
+          <p class="summary">Many users report the pump becomes noticeably loud when it shifts into the high-pressure/compressor stage — this is an expected tradeoff in small high-pressure pumps but can be disruptive at lakes or busy launch spots.</p>
+          <div class="quotes">
+            <div class="quote">
+              <p>"This worked very quickly and quietly until the SUP ... reached 1 psi. As soon as there was any back pressure the pump changed sounds and got very loud ... it also made the tube very hot!"</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">D'Anemone (Amazon) <span class="ext">↗</span></a></div>
+            </div>
+            <div class="quote">
+              <p>"It changes sound and goes into high pressure pumping mode."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">Pulse Pro hands-on review (YouTube) <span class="ext">↗</span></a> <span class="muted" style="color:var(--muted)">06:12–06:23</span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- 6 Negative: Heat buildup and strain on heavy high-PSI jobs -->
+      <section class="slide" aria-roledescription="slide" aria-label="Heat buildup on heavy jobs">
+        <article class="card">
+          <span class="flair" style="background:#ffeef0; color:#d93a3a; border-color:#ffdce0;">Negative</span>
+          <h2 class="sentiment-title">Heat buildup and strain on heavy high‑PSI jobs</h2>
+          <p class="summary">Small pumps like this generate heat under sustained high-pressure duty; reviewers and testers warn that repeated inflations at 20 PSI (large/long boards) can overheat connectors and shorten lifespan — one user reported the hose became too hot to touch and ~96 dB at 1 m during use.</p>
+          <div class="quotes">
+            <div class="quote">
+              <p>"It pumped my 14' SUP in 10.3 minutes and produced 96 decibels at one meter. The hose got so hot I could no longer touch it."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">Amazon Kunde (Amazon) <span class="ext">↗</span></a></div>
+            </div>
+            <div class="quote">
+              <p>"Any of these small Q pumps we've tried ... they all seem to fall apart when you do a 12'6 board that inflates to 20 PSI. When you go to a big touring board that goes to high pressure, they can do it once, maybe twice, but that seems to be too much heat inside and that seems to kill them."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">Pulse Pro hands-on review (YouTube) <span class="ext">↗</span></a> <span class="muted" style="color:var(--muted)">04:03–04:24</span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- 7 Negative: Some reliability / early-failure reports -->
+      <section class="slide" aria-roledescription="slide" aria-label="Reliability reports">
+        <article class="card">
+          <span class="flair" style="background:#ffeef0; color:#d93a3a; border-color:#ffdce0;">Negative</span>
+          <h2 class="sentiment-title">Some reliability / early‑failure reports</h2>
+          <p class="summary">While many customers report good performance, isolated reports exist of units failing after a small number of uses (won't charge or turn on), and at least one customer cited poor seller response for warranty/help.</p>
+          <div class="quotes">
+            <div class="quote">
+              <p>"This worked really well… twice! We only use it once in a while so it is outside the return date by a week. It won’t charge it won’t turn on. I tried contacting the seller with absolutely no response."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">Cindee (Amazon) <span class="ext">↗</span></a></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- 8 Negative: No charger included / slow charging without PD adapter -->
+      <section class="slide" aria-roledescription="slide" aria-label="No charger included">
+        <article class="card">
+          <span class="flair" style="background:#ffeef0; color:#d93a3a; border-color:#ffdce0;">Negative</span>
+          <h2 class="sentiment-title">No charger included / slow charging without PD adapter</h2>
+          <p class="summary">The pump includes a USB-C cable but not a USB-C power adapter; reviewers emphasize you should bring a 30W+ USB-C PD charger for reasonable recharge times or it will be very slow with low-power phone chargers.</p>
+          <div class="quotes">
+            <div class="quote">
+              <p>"It doesn't come with a charger. ... You are really gonna want a 30W charger or you need to be 1000% certain that you aren't gonna need to use it more than once a day."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">Jon Allen (Amazon) <span class="ext">↗</span></a></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- 9 Mixed: Adapters and sealing can require trial and error -->
+      <section class="slide" aria-roledescription="slide" aria-label="Adapters and sealing">
+        <article class="card">
+          <span class="flair" style="background:#fff7cc; color:#735c0f; border-color:#ffe58f;">Mixed</span>
+          <h2 class="sentiment-title">Adapters and sealing can require trial and error</h2>
+          <p class="summary">Most users find the supplied stackable nozzles and gaskets cover common valves, but some had to try different gaskets or use a hand-pump gasket to get a reliable seal; fitting certain kite/wing valves may require trial and careful tightening.</p>
+          <div class="quotes">
+            <div class="quote">
+              <p>"I wasn't getting a good seal with the provided gaskets, and finally used the gasket from the hand pump that came with the board, and it sealed great."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">The Goode Life Outdoors (Amazon) <span class="ext">↗</span></a></div>
+            </div>
+            <div class="quote">
+              <p>"I needed something that could inflate my tent ... this also comes with a variety of adapters which I found so awesome because I needed something that could inflate my tent ... I had to find the one that works."</p>
+              <div class="cite"><a href="#" role="link" aria-label="Source link not provided">wing inflation how‑to (YouTube) <span class="ext">↗</span></a> <span class="muted" style="color:var(--muted)">00:32–01:13</span></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Slides end -->
+
+    </div>
+  </main>
+
+  <div class="controls" aria-hidden="false">
+    <button class="btn" id="prev" aria-label="Previous sentiment">⬅︎ Prev</button>
+    <div class="dots" id="dots" aria-label="Slide indicators"></div>
+    <button class="btn" id="next" aria-label="Next sentiment">Next ➡︎</button>
+  </div>
+
+  <footer>
+    Visual links are provided for source indication; URLs were not supplied.
+  </footer>
+
+  <script>
+    (function(){
+      const track = document.getElementById('track');
+      const slides = Array.from(track.children);
+      const prev = document.getElementById('prev');
+      const next = document.getElementById('next');
+      const dotsWrap = document.getElementById('dots');
+      let index = 0; let startX = 0; let currentX = 0; let isDragging = false; let width = track.clientWidth;
+
+      function update() {
+        width = track.clientWidth;
+        track.style.transform = `translateX(${-index * width}px)`;
+        Array.from(dotsWrap.children).forEach((d, i) => d.classList.toggle('active', i === index));
+      }
+
+      function go(i){
+        index = Math.max(0, Math.min(i, slides.length - 1));
+        update();
+      }
+
+      // Dots
+      dotsWrap.innerHTML = '';
+      slides.forEach((_, i)=>{
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i===0 ? ' active' : '');
+        dot.addEventListener('click', ()=> go(i));
+        dotsWrap.appendChild(dot);
+      });
+
+      // Buttons
+      prev.addEventListener('click', ()=> go(index - 1));
+      next.addEventListener('click', ()=> go(index + 1));
+
+      // Touch/swipe
+      track.addEventListener('touchstart', (e)=>{
+        isDragging = true; startX = e.touches[0].clientX; currentX = startX;
+      }, {passive:true});
+      track.addEventListener('touchmove', (e)=>{
+        if(!isDragging) return; currentX = e.touches[0].clientX;
+        const dx = currentX - startX;
+        track.style.transform = `translateX(${(-index * width) + dx}px)`;
+      }, {passive:true});
+      track.addEventListener('touchend', ()=>{
+        if(!isDragging) return; isDragging = false;
+        const dx = currentX - startX;
+        if(Math.abs(dx) > width * 0.2){
+          if(dx < 0) go(index + 1); else go(index - 1);
+        } else {
+          update();
+        }
+      });
+
+      window.addEventListener('resize', update);
+      update();
+    })();
+  </script>
+</body>
+</html>
